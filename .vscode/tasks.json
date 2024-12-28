@@ -11,7 +11,7 @@
         "${workspaceFolder}\\src\\*.cpp",
         "/Fo:${workspaceFolder}\\obj\\",
         "/link",
-        "/OUT:${workspaceFolder}\\_native.pyd"
+        "/OUT:${workspaceFolder}\\camera_reader_win\\_native.pyd"
       ],
       "options": {
         "cwd": "${workspaceFolder}\\obj",
