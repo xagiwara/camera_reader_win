@@ -1,0 +1,3 @@
+__all__ = ["MediaEvent"]
+
+class MediaEvent: ...
