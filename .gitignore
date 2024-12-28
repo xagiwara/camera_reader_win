@@ -1,7 +1,8 @@
-.vscode/c_cpp_properties.json
-.vscode/settings.json
-obj/*
-!obj/.dummy
+/.vscode/c_cpp_properties.json
+/.vscode/settings.json
+/obj/*
+!/obj/.dummy
 _native.pyd
 *.egg-info
 **/__pycache__
+/build
