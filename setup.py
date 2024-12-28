@@ -7,7 +7,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     package_data={
-        "mypackage": ["*.pyd"],  # .pydファイルを含める
+        "camera_reader_win": ["**/*.pyd"],  # .pydファイルを含める
     },
     classifiers=[
         "Programming Language :: Python :: 3",
