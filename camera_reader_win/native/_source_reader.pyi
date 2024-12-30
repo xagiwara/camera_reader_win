@@ -1,4 +1,4 @@
-from abc import ABCMeta, abstractmethod
+from typing import Callable
 from ._media_event import MediaEvent
 from ._sample import Sample
 from ._media_type import MediaType
@@ -24,17 +24,7 @@ class SourceReader(Closable["SourceReader"]):
     ) -> tuple[int, int, int, Sample | None]: ...
     def read_sample_async(self, stream_index: int, flags: int = 0) -> None: ...
 
-class SourceReaderCallback(metaclass=ABCMeta):
-    @abstractmethod
-    def on_event(self, stream_index: int, event: MediaEvent) -> None: ...
-    @abstractmethod
-    def on_flush(self, stream_index: int) -> None: ...
-    @abstractmethod
-    def on_read_sample(
-        self,
-        hr_status: int,
-        stream_index: int,
-        stream_flags: int,
-        timestamp: int,
-        sample: Sample,
-    ) -> None: ...
+class SourceReaderCallback:
+    on_event: Callable[[int, MediaEvent], None] | None
+    on_flush: Callable[[int], None] | None
+    on_read_sample: Callable[[int, int, int, int, Sample], None] | None
