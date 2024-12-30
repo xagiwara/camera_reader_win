@@ -83,6 +83,8 @@ class VideoDeviceInfo(NamedTuple):
 
 class VideoDevice:
     _media_source: native.MediaSource
+    _frame_rate: FrameRate
+    _frame_size: FrameSize
 
     def __init__(
         self,
@@ -103,6 +105,9 @@ class VideoDevice:
         if frame_rate is not None:
             mt.frame_rate = (*frame_rate,)
         self._reader.set_current_media_type(0, mt)
+        mt = self._reader.get_current_media_type(0)
+        self._frame_size = FrameSize(*mt.frame_size)
+        self._frame_rate = FrameRate(*mt.frame_rate)
 
     def close(self):
         self._reader.close()
@@ -127,6 +132,14 @@ class VideoDevice:
     async def read_sample(self):
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, self.read_sample_sync)
+
+    @property
+    def frame_size(self) -> FrameSize:
+        return self._frame_size
+
+    @property
+    def frame_rate(self) -> FrameRate:
+        return self._frame_rate
 
     @staticmethod
     def enum_options(name: str | VideoDeviceInfo) -> list[VideoDeviceInfo]:
