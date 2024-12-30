@@ -89,8 +89,8 @@ class VideoDevice:
     def __init__(
         self,
         name: str | VideoDeviceInfo,
-        frame_size: tuple[int, int] | None,
-        frame_rate: tuple[int, int] | None,
+        frame_size: tuple[int, int] | None = None,
+        frame_rate: tuple[int, int] | None = None,
     ):
         name = name if isinstance(name, str) else name.name
         self._media_source = native.MediaSource("video", name)
