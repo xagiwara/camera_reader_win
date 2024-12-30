@@ -24,6 +24,7 @@
 #pragma comment(lib, "ole32")
 
 PYBIND11_MODULE(_native, m) {
+    CoInitializeEx(0, COINIT_MULTITHREADED);
     MFStartup(MF_VERSION);
 
     m.doc() = "Camera Py Win Native Module";

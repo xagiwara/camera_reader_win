@@ -2,6 +2,7 @@
 #include <mferror.h>
 #include <mfreadwrite.h>
 #include <iostream>
+#include <pybind11/functional.h>
 
 #include "source-reader.hpp"
 #include "safe-release.hpp"
@@ -13,11 +14,18 @@ EXTERN_GUID(MF_SOURCE_READER_PASSTHROUGH_MODE, 0x043FF126, 0xFE2C, 0x4708, 0xa9,
 
 #pragma region SourceReader
 
-SourceReader::SourceReader(IMFSourceReader *pSourceReader, SourceReaderCallbackNative *callback) : pSourceReader(pSourceReader), callback(callback) {
+SourceReader::SourceReader(IMFSourceReader *pSourceReader, SourceReaderCallback *callback) : pSourceReader(pSourceReader), callback(callback) {
+    if (callback != nullptr) {
+        Py_INCREF(callback);
+    }
 }
 
 void SourceReader::closer() {
     SafeRelease(&pSourceReader);
+    if (callback != nullptr) {
+        Py_DECREF(callback);
+        callback = nullptr;
+    }
 }
 
 void SourceReader::_register(pybind11::module m) {
@@ -44,7 +52,6 @@ SourceReader *MediaSource::create_source_reader(
     void *fieldofuse_ulock_attribute
 ) {
     IMFAttributes *pAttributes = NULL;
-    SourceReaderCallbackNative *callback = nullptr;
 
     CheckHResult(MFCreateAttributes(&pAttributes, 1));
     if (low_latency != nullptr) {
@@ -87,7 +94,7 @@ SourceReader *MediaSource::create_source_reader(
     IMFSourceReader *pSourceReader;
     CheckHResult(MFCreateSourceReaderFromMediaSource(pMediaSource, pAttributes, &pSourceReader));
     SafeRelease(&pAttributes);
-    return new SourceReader(pSourceReader, callback);
+    return new SourceReader(pSourceReader, source_reader_async_callback);
 }
 
 MediaType *SourceReader::get_current_media_type(DWORD stream_index) {
@@ -150,14 +157,13 @@ void SourceReader::read_sample_async(DWORD stream_index, DWORD control_flags) {
 }
 #pragma endregion
 
-
 #pragma region SourceReaderCallback
 void SourceReaderCallback::_register(pybind11::module m) {
     pybind11::class_<SourceReaderCallback>(m, "SourceReaderCallback")
         .def(pybind11::init<>())
-        .def("on_event", &SourceReaderCallback::on_event)
-        .def("on_flush", &SourceReaderCallback::on_flush)
-        .def("on_read_sample", &SourceReaderCallback::on_read_sample)
+        .def_readwrite("on_event", &SourceReaderCallback::on_event)
+        .def_readwrite("on_flush", &SourceReaderCallback::on_flush)
+        .def_readwrite("on_read_sample", &SourceReaderCallback::on_read_sample)
     ;
 }
 
@@ -173,23 +179,36 @@ SourceReaderCallback::~SourceReaderCallback() {
 
 #pragma region SourceReaderCallbackNative
 SourceReaderCallbackNative::SourceReaderCallbackNative(SourceReaderCallback *callback) : callback(callback) {
+    Py_INCREF(callback);
+}
+
+SourceReaderCallbackNative::~SourceReaderCallbackNative() {
+    Py_DECREF(callback);
 }
 
 HRESULT SourceReaderCallbackNative::OnEvent(DWORD dwStreamIndex, IMFMediaEvent *pEvent) {
-    std::cerr << "OnEvent" << std::endl;
-    callback->on_event(dwStreamIndex, new MediaEvent(pEvent));
+    if (callback->on_event == nullptr) {
+        callback->on_event(dwStreamIndex, new MediaEvent(pEvent));
+    }
     return S_OK;
 }
 
 HRESULT SourceReaderCallbackNative::OnFlush(DWORD dwStreamIndex) {
-    std::cerr << "OnFlush" << std::endl;
-    callback->on_flush(dwStreamIndex);
+    if (callback->on_flush != nullptr) {
+        callback->on_flush(dwStreamIndex);
+    }
     return S_OK;
 }
 
 HRESULT SourceReaderCallbackNative::OnReadSample(HRESULT hrStatus, DWORD dwStreamIndex, DWORD dwStreamFlags, LONGLONG llTimestamp, IMFSample *pSample) {
-    std::cerr << "OnReadSample" << std::endl;
-    callback->on_read_sample(hrStatus, dwStreamIndex, dwStreamFlags, llTimestamp, new Sample(pSample));
+    if (callback->on_read_sample != nullptr) {
+        Sample *sample = nullptr;
+        if (pSample != nullptr) {
+            pSample->AddRef();
+            sample = new Sample(pSample);
+        }
+        callback->on_read_sample(hrStatus, dwStreamIndex, dwStreamFlags, llTimestamp, sample);
+    }
     return S_OK;
 }
 
