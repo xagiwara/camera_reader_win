@@ -8,18 +8,21 @@
 #include "sample.hpp"
 #include "media-type.hpp"
 
+using SourceReaderOnEventCallback = std::function<void(int stream_index, MediaEvent *pEvent)>;
+using SourceReaderOnFlushCallback = std::function<void(int stream_index)>;
+using SourceReaderOnReadSampleCallback = std::function<void(int hr_status, int stream_index, int stream_flags, int64_t timestamp, Sample *pSample)>;
+
 class SourceReaderCallbackNative;
 
 class SourceReaderCallback {
 public:
     SourceReaderCallbackNative *pNative;
+    SourceReaderOnEventCallback on_event = nullptr;
+    SourceReaderOnFlushCallback on_flush = nullptr;
+    SourceReaderOnReadSampleCallback on_read_sample = nullptr;
 
     SourceReaderCallback();
     ~SourceReaderCallback();
-
-    virtual void on_event(int stream_index, MediaEvent *pEvent) {}
-    virtual void on_flush(int stream_index) {}
-    virtual void on_read_sample(int hr_status, int stream_index, int stream_flags, int64_t timestamp, Sample *pSample) {}
 
     static void _register(pybind11::module m);
 };
@@ -30,6 +33,7 @@ private:
     SourceReaderCallback *callback = NULL;
 public:
     SourceReaderCallbackNative(SourceReaderCallback *callback);
+    ~SourceReaderCallbackNative();
 
     HRESULT OnEvent(DWORD dwStreamIndex, IMFMediaEvent *pEvent) override;
     HRESULT OnFlush(DWORD dwStreamIndex) override;
@@ -43,9 +47,9 @@ public:
 class SourceReader : public Closable {
 private:
     IMFSourceReader *pSourceReader = nullptr;
-    SourceReaderCallbackNative *callback = nullptr;
+    SourceReaderCallback *callback = nullptr;
 public:
-    SourceReader(IMFSourceReader *pSourceReader, SourceReaderCallbackNative *callback = nullptr);
+    SourceReader(IMFSourceReader *pSourceReader, SourceReaderCallback *callback = nullptr);
     void closer() override;
 
     MediaType *get_current_media_type(DWORD stream_index);
