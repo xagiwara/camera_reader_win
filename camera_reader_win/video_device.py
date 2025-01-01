@@ -144,12 +144,9 @@ class VideoDevice:
     async def read_sample(self):
         loop = asyncio.get_running_loop()
         future: asyncio.Future[tuple[int, bytes]] = loop.create_future()
-        # future: asyncio.Future[tuple[int, bytes]] = asyncio.Future()
         self._futures.append((loop, future))
         self._reader.read_sample_async(0)
         return await future
-        # loop = asyncio.get_event_loop()
-        # return await loop.run_in_executor(None, self.read_sample_sync)
 
     @property
     def frame_size(self) -> FrameSize:
