@@ -1,4 +1,5 @@
 #include "guid.hpp"
+#include "errors/hresult.hpp"
 
 Guid::Guid() {
     ZeroMemory(&_data, sizeof(_data));
@@ -9,12 +10,12 @@ Guid::Guid(GUID guid) {
 }
 
 Guid::Guid(std::wstring str) {
-    CLSIDFromString(str.c_str(), &_data);
+    CheckHResult(CLSIDFromString(str.c_str(), &_data));
 }
 
 std::wstring Guid::__str__() {
     wchar_t buffer[39];
-    StringFromGUID2(_data, buffer, 39);
+    CheckHResult(StringFromGUID2(_data, buffer, 39));
     return buffer;
 }
 

@@ -10,7 +10,8 @@ setup(
         "camera_reader_win": ["**/*.pyd"],  # .pydファイルを含める
     },
     classifiers=[
-        "Programming Language :: Python :: 3",
+        "Development Status :: 3 - Alpha",
+        "Programming Language :: Python :: 3.12",
         "Operating System :: Microsoft :: Windows",  # .pydはWindows限定
     ],
 )

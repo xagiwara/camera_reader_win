@@ -16,6 +16,7 @@
 #include "guid-enum.hpp"
 #include "sample.hpp"
 #include "media-buffer.hpp"
+#include "errors/hresult.hpp"
 
 #pragma comment(lib, "mf")
 #pragma comment(lib, "mfreadwrite")
@@ -24,8 +25,8 @@
 #pragma comment(lib, "ole32")
 
 PYBIND11_MODULE(_native, m) {
-    CoInitializeEx(0, COINIT_MULTITHREADED);
-    MFStartup(MF_VERSION);
+    CheckHResult(CoInitializeEx(0, COINIT_MULTITHREADED));
+    CheckHResult(MFStartup(MF_VERSION));
 
     m.doc() = "Camera Py Win Native Module";
 

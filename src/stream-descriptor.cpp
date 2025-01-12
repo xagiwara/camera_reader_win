@@ -46,16 +46,16 @@ void StreamDescriptor::_register(pybind11::module &m) {
 
 void StreamDescriptorByIndex::set_selected(bool selected) {
     if (selected) {
-        pPresentationDescriptor->SelectStream(index);
+        CheckHResult(pPresentationDescriptor->SelectStream(index));
     } else {
-        pPresentationDescriptor->DeselectStream(index);
+        CheckHResult(pPresentationDescriptor->DeselectStream(index));
     }
 }
 
 bool StreamDescriptorByIndex::get_selected() {
     BOOL selected;
     IMFStreamDescriptor *pDescriptor;
-    pPresentationDescriptor->GetStreamDescriptorByIndex(index, &selected, &pDescriptor);
+    CheckHResult(pPresentationDescriptor->GetStreamDescriptorByIndex(index, &selected, &pDescriptor));
     SafeRelease(&pDescriptor);
     return selected;
 }

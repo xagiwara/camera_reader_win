@@ -3,9 +3,10 @@
 #include <pybind11/stl.h>
 #include <mfidl.h>
 
-class HResultError : public std::exception {
+class HResultError : public std::runtime_error {
 public:
     HRESULT hr;
+    std::string hresult_message;
 
     HResultError(HRESULT hr);
 
