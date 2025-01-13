@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="camera_reader_win",
-    version="0.0.1a0",
+    version="0.0.1a1",
     description="A package containing a .pyd module",
     packages=find_packages(),
     include_package_data=True,

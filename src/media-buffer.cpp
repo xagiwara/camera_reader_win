@@ -70,6 +70,7 @@ void MediaBuffer2D::_register(pybind11::module m) {
 MediaBuffer *create_media_buffer(IMFMediaBuffer *pMediaBuffer) {
     IMF2DBuffer *p2DBuffer = NULL;
     if (SUCCEEDED(pMediaBuffer->QueryInterface(__uuidof(IMF2DBuffer), (void **)&p2DBuffer))) {
+        pMediaBuffer->Release();
         return new MediaBuffer2D(pMediaBuffer, p2DBuffer);
     }
     return new MediaBuffer(pMediaBuffer);
