@@ -3,12 +3,14 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
-[packages]
-
 [dev-packages]
 pybind11 = "*"
 setuptools = "*"
 pytest = "*"
+keyring = "*"
+"keyrings.google-artifactregistry-auth" = "*"
+wheel = "*"
+twine = "*"
 
 [requires]
 python_version = "3.12"
@@ -16,3 +18,5 @@ python_full_version = "3.12.7"
 
 [scripts]
 test = "pytest"
+
+[packages]

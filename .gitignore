@@ -6,3 +6,4 @@ _native.pyd
 *.egg-info
 **/__pycache__
 /build
+/dist
